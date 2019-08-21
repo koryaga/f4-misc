@@ -17,10 +17,10 @@ struct STATE{
 
 // possible CPU instructions
 enum INSTRUCTIONS{
-	ADDi=1, // imm+(A) --> A 
+  ADDi=1, // imm+(A) --> A 
   ADDm,   // (addr)+(A) --> A
   ADDpc,  // PC+(A) --> A
-	BVS,    // (addr) --> PC if <v>=1
+  BVS,    // (addr) --> PC if <v>=1
   LDAi,   // imm --> A 
   LDAm,   // (addr) --> A
   LDApc,  // PC --> A

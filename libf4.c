@@ -2,8 +2,6 @@
 #include <f4.h>
 #include <limits.h>
 #include <errno.h>
-//#include <string.h>
-//#include <stdlib.h>
 
 #ifdef TEST
 //simple test with fixed code
