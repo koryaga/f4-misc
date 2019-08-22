@@ -27,23 +27,18 @@ int main(){
   st.overflow=false;
   st.code=ss;
   
-
-  print_state(&st);
-  printf("--------------\n");
   for(int i=0;i<(st.size/2);i++){ 
     if(!run_iteration(&st))
       { errno=-1; perror("Error"); }
     
-    print_state(&st);
   }
-  print_code(&st);
   //A=9 PC=4 Over=0
   if(st.a!=9 || st.pc!=4 || st.overflow!=0 ) { //test failed
     errno = -1; //Unkown error
-    perror("Test failed");
+    perror("Test failed\n");
     return 1;
   }else{
-    printf("Test passed");
+    printf("Test passed\n");
     return 0;
   }
 }
@@ -137,15 +132,4 @@ void reset(struct STATE *st){
   st->size=0;
   st->overflow=false;
   st->code=NULL;
-}
-
-
-void print_state(struct STATE *st){
-  printf("A=%i PC=%i Over=%i Size=%i\n",st->a,st->pc,st->overflow,st->size);
-}
-
-void print_code(struct STATE *st){
-  printf("\n");
-  for(int i=0;i<st->size/2;i++)
-    printf("%i [%i] [%i]\n",i+i,st->code[i].cmd,st->code[i].param);
 }

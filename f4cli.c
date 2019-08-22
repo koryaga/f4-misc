@@ -6,6 +6,8 @@
 
 #define INSTR_L 5  //length of instruction command name
 
+static void print_state(struct STATE *);
+static void print_code(struct STATE *);
 static int get_instr(char *);
 
 int main(int argc, char *argv[]){
@@ -43,12 +45,23 @@ int main(int argc, char *argv[]){
   }
 }
 
-static int get_instr(char *name){
-  char *cpu_cmd[]={ //appropriate command names for INSTRUCTIONS
+static  char *cpu_cmd[]={ //appropriate command names for INSTRUCTIONS
     "ADDi", "ADDm", "ADDpc", "BVS", "LDAi", "LDAm", "LDApc", "STAm", "STApc" };
-  for(int i=0;i<sizeof(cpu_cmd)/sizeof(char*);i++){
+ 
+static int get_instr(char *name){
+ for(int i=0;i<sizeof(cpu_cmd)/sizeof(char*);i++){
     if(!strncmp(cpu_cmd[i],name,INSTR_L)) //TODO better to use something more regexp friendly
       return ++i; //instruction index starts from 1
   }
   return 0;// command not found
+}
+
+void print_state(struct STATE *st){
+  printf("A=%i PC=%i Over=%i Size=%i\n",st->a,st->pc,st->overflow,st->size);
+}
+
+void print_code(struct STATE *st){
+  printf("\n");
+  for(int i=0;i<st->size/2;i++)
+    printf("%i [%s] [%i]\n",i+i,cpu_cmd[st->code[i].cmd-1],st->code[i].param);
 }

@@ -39,7 +39,4 @@ struct INSTR{
 // run one iteration
 int  run_iteration(struct STATE *);
 void reset(struct STATE *);
-void print_state(struct STATE *);
-void print_code(struct STATE *);
-
 #endif
