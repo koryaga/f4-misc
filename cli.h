@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define MAX_CMDPARAM_SIZE 5    
-#define MAX_PARAM_COUNT 2
+#define MAX_PARAM_COUNT 4
 
 
 struct cmd{

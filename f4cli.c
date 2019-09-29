@@ -1,78 +1,103 @@
 #include <stdio.h>
-#include <f4.h>
 #include <limits.h>
 #include <string.h>
 #include <stdlib.h>
+#include <f4.h>
+#include <cli.h>
 
-#define INSTR_L 5  //length of instruction command name
+struct STATE st; //F4 CPU state
+int end=0; //instruction end in the memory. Index to set new instruction during editing
 
-static void print_state(struct STATE *);
-static void print_code(struct STATE *);
-static int  get_instr(char *);
-static parse_cmd(char *s);
+int print_state();
+int print_code();
+int get_instr(char *);
+int set_instr(char *param[]);
+int edit_state(char *param[]);
+int set_instr_index(char *param[]);
+int run_iteration_cmd();
 
-struct {
-  char 
-}cmd;
+char cpu_instr[][MAX_CMDPARAM_SIZE+1]={ //appropriate instraction names for INSTRUCTIONS. Must be in the same positions as their instructions
+    "ADDi", "ADDm", "ADDpc", "BVS", "LDAi", "LDAm", "LDApc", "STAm", "STApc" };
 
-static char* cmds[]={"editstate","instrindex","printstate","printcode","run","setinstr"};
+
+struct cmd cmd_names[]={
+    {"e",edit_state,3}, //edit state
+    {"ps",print_state,0},
+    {"pc",print_code,0},
+    {"i",set_instr_index,1},
+    //{"\n",run_iteration_cmd,0},   //default command ; <Enter> 
+    {"r",run_iteration_cmd,0},    
+    {cpu_instr[0],set_instr,1},    
+    {cpu_instr[1],set_instr,1},    
+    {cpu_instr[2],set_instr,0},    
+    {cpu_instr[3],set_instr,1},    
+    {cpu_instr[4],set_instr,1},    
+    {cpu_instr[5],set_instr,1},    
+    {cpu_instr[6],set_instr,0},    
+    {cpu_instr[7],set_instr,1},    
+    {cpu_instr[8],set_instr,0},    
+    {NULL,NULL,0}
+  };
 
 //edit state; change instr edit index; print state; print code(index); run iteration; set instr
+int set_instr_index(char *param[]){
+  end = atoi(param[1]);
+}
+
+int run_iteration_cmd(){
+  run_iteration(&st);
+}
+
+int edit_state(char *param[]){ // param[1]=a; pc; overflow; siza
+  st.a = atoi(param[1]);
+  st.pc = atoi(param[2]);
+  st.overflow = atoi(param[3]);
+  //TODO st.size = atoi(param[4]);
+  //TODO need to realloc real code size if needed
+}
+
+int set_instr(char *param[]){
+  struct INSTR is;
+  int instr=get_instr(param[0]);
+  is.cmd = instr;
+  is.param = ( (param[1]!=NULL)?atoi(param[1]):0 );
+  memcpy((st.code+end/2),&is,sizeof(is));
+  end+=2;
+}
 
 int main(int argc, char *argv[]){
-  char instr[INSTR_L+1];
   w_size param;
-  struct STATE st;
   struct INSTR is;
-  int end=0; //instruction end in the memory
+  char ps1[20];
   //init cpu
   st.a=0;
   st.pc=0;
   st.size=atoi(argv[1]);
   st.overflow=false;
   st.code=(struct INSTR *) malloc(atoi(argv[1])*sizeof(w_size)); //allocate memory in w_size (16bit) chunks
-  
-  for(;;){
-    print_state(&st);
-    printf("\nf4[%i]>",end+end);
-    
-    int ret = scanf("%s %hi",instr,&is.param);
-    if(!(is.cmd=get_instr(instr))){
-      printf("Wrong command\n");
-      continue;
-    }
-    if (ret==-1){
-       if(!run_iteration(&st))
-          break;
-    }
-    else{
-      memcpy((st.code+end),&is,sizeof(is));
-      end++;
-      if(end >= st.size/(sizeof(struct INSTR)/sizeof(w_size))) end=0; 
-    }  
+  while(1){
+    sprintf(ps1,"\nF4 state(A=%i PC=%i Over=%i) Enter command[%i]:",st.a,st.pc,st.overflow,end);
+    cli_handler(ps1,cmd_names);
   }
-  print_code(&st);
 }
 
-static  char *cpu_instr[]={ //appropriate instraction names for INSTRUCTIONS
-    "ADDi", "ADDm", "ADDpc", "BVS", "LDAi", "LDAm", "LDApc", "STAm", "STApc" };
 
+int get_instr(char *name){
 
-static int get_instr(char *name){
- for(int i=0;i<sizeof(cpu_instr)/sizeof(char*);i++){
-    if(!strncmp(cpu_instr[i],name,INSTR_L)) //TODO better to use something more regexp friendly
+ for(int i=0;i<sizeof(cpu_instr)/(MAX_CMDPARAM_SIZE+1);i++){
+    if(!strncmp(cpu_instr[i],name,MAX_CMDPARAM_SIZE)) 
       return ++i; //instruction index starts from 1
   }
   return 0;// command not found
 }
 
 
-void print_state(struct STATE *st){
-  printf("A=%i PC=%i Over=%i Size=%i\n",st->a,st->pc,st->overflow,st->size);
+int print_state(){
+  printf("A=%i PC=%i Over=%i Size=%i\n",st.a,st.pc,st.overflow,st.size);
 }
 
-void print_code(struct STATE *st){
+int print_code(){
   printf("\n");
-  for(int i=0;i<st->size/2;i++)
-    printf("%i [%s] [%i]\n",i+i,cpu_cmd[st->code[i].cmd-1],st->code[i].param);
+  for(int i=0;i<st.size/2;i++)
+    printf("%i [%s] [%i]\n",i+i,cpu_instr[st.code[i].cmd-1],st.code[i].param);
 }

@@ -1,15 +1,14 @@
 CC=gcc
-CFLAGS=-I.
+CFLAGS=-I. -std=gnu11
+#using gnu11 for strndup and for(int i loop 
 
-SOURCES=libf4.c f4cli.c
+SOURCES=libf4.c f4cli.c libcli.c
 OBJ=$(SOURCES:.c=.o)
 
-all: f4cli lib
+all: f4cli 
 
-f4cli: f4cli.o lib
+f4cli: f4cli.o libf4.o libcli.o
 	$(CC) $(CFLAGS)  $(OBJ) -o $@
-
-lib: libf4.o f4.h
 
 test: 
 	rm -rf libf4.o
