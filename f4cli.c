@@ -68,7 +68,7 @@ int set_instr(char *param[]){
 int main(int argc, char *argv[]){
   w_size param;
   struct INSTR is;
-  char ps1[20];
+  char ps1[100];
   //init cpu
   st.a=0;
   st.pc=0;
