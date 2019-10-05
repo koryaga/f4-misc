@@ -42,8 +42,8 @@ int main(int argc, char *argv[]){
 #endif
 
 //parses single command string according to cmd_names
-bool cli_handler(char *promt, struct cmd cmd_name[]){
-  bool ret=true;
+int cli_handler(char *promt, struct cmd cmd_name[]){
+  bool ret=0;
   
   char *argv_c[MAX_PARAM_COUNT+1]={NULL}; // +1 for command name; argv_c[0] - command name; argv_c[1...] params
   regex_t re;
@@ -66,14 +66,15 @@ bool cli_handler(char *promt, struct cmd cmd_name[]){
   int ret_code = regcomp(&re,(const char*)regex_cmd, REG_EXTENDED);
   
   printf("%s",promt);
-  fgets(str,sizeof(str),stdin);
+  if(fgets(str,sizeof(str),stdin)==NULL)
+    return -1; //EOF
   
   //apply regexp
   ret_code = regexec(&re, str,sizeof(matches)/sizeof(matches[0]),(regmatch_t*)&matches,0);
   if (ret_code!=0){
     free(regex_cmd);
     regfree(&re);
-    return false;//not match
+    return 1;//not match
   }
 
   //copy command and each parsed parameter usinf malloc. Need a free! 
@@ -89,13 +90,16 @@ bool cli_handler(char *promt, struct cmd cmd_name[]){
   // find related command and run it with params
   for(int i=0;cmd_name[i].name!=NULL;i++){
     if(strncmp(argv_c[0],cmd_name[i].name,MAX_CMDPARAM_SIZE) == 0){
-      if(cmd_name[i].argc==match_cnt-1) //if params match
+      if(cmd_name[i].argc==match_cnt-1){ //if params match
         (cmd_name[i].ff)(argv_c);
+        ret=0;
+      }
       else
-        ret=false; //passed params not matched for command
-      
+        ret=1; //passed params not matched for command
       break;
-    }
+    
+    }else
+      ret=1;    
   }
   
   for(int i=0;i<match_cnt;i++)

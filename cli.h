@@ -14,7 +14,8 @@ struct cmd{
 };
 
 // 1 - promt string; 2 - filled cmd array
-bool cli_handler(char *promt, struct cmd cmd_name[]);
+// 0 - ok; 1 - wrong command ; -1 - EOF
+int cli_handler(char *promt, struct cmd cmd_name[]);
 
 
 #endif
