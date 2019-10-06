@@ -26,12 +26,12 @@ char cpu_instr[][MAX_CMDPARAM_SIZE+1]={ //appropriate instraction names for INST
 
 
 struct cmd cmd_names[]={
-    {"e",edit_state,3}, //edit state
-    {"ps",print_state,0},
-    {"pc",print_code,0},
-    {"i",set_instr_index,1},
+    {"e",edit_state,3},           // edit F4 CPU state A= PC= Over=
+    {"ps",print_state,0},         // print F4state
+    {"pc",print_code,0},          // print code
+    {"i",set_instr_index,1},      // edit instruction index where to put next CPU instruction. Interactive mode
     //{"\n",run_iteration_cmd,0},   //default command ; <Enter> 
-    {"r",run_iteration_cmd,0}, 
+    {"r",run_iteration_cmd,0},    // run single CPU instruction 
     {cpu_instr[0],set_instr,1},    
     {cpu_instr[1],set_instr,1},    
     {cpu_instr[2],set_instr,0},    
@@ -44,7 +44,6 @@ struct cmd cmd_names[]={
     {NULL,NULL,0}
   };
 
-//edit state; change instr edit index; print state; print code(index); run iteration; set instr
 int set_instr_index(char *param[]){
   end = atoi(param[1]);
 }
@@ -53,7 +52,7 @@ int run_iteration_cmd(){
   run_iteration(&st);
 }
 
-int edit_state(char *param[]){ // param[1]=a; pc; overflow; siza
+int edit_state(char *param[]){ // param[1]=a; pc; overflow; 
   st.a = atoi(param[1]);
   st.pc = atoi(param[2]);
   st.overflow = atoi(param[3]);
@@ -78,13 +77,13 @@ int main(int argc, char *argv[]){
   struct INSTR is;
   char ps1[100];
   
-  // set mode interactive or not
+  // set mode interactive or not depending on stdin descriptor
   struct stat stat;
   fstat(STDIN_FILENO,&stat);
   intMode=(stat.st_mode & S_IFIFO)?false:true;
 
   //init cpu
-  int size=atoi((argv[1]==NULL)?"100":argv[1]); //100 w_size if not passed
+  int size=atoi((argv[1]==NULL)?"50":argv[1]); //100 w_size if not passed
   st.a=0;
   st.pc=0;
   st.size=size;
@@ -95,7 +94,7 @@ int main(int argc, char *argv[]){
     int ret=cli_handler(ps1,cmd_names);
     if(ret==-1)
       return 0;
-    else if(ret==1)
+    else if(ret==1 && intMode==true)
       printf("Wrong command or parameter(s)");
       
   }
