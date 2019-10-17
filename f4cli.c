@@ -67,8 +67,6 @@ int set_instr(char *param[]){
   is.param = ( (param[1]!=NULL)?atoi(param[1]):0 );
   memcpy((st.code+end/2),&is,sizeof(is));
   end+=2;
-  if(intMode==false)  //in pipe mode run instruction immediatly, in non-iner mode just insert it in memory
-    run_iteration(&st);
 }
 
 // argv[1] - mem size in 16bit words
@@ -91,9 +89,13 @@ int main(int argc, char *argv[]){
   st.code=(struct INSTR *) malloc(size*sizeof(w_size)); //allocate memory in w_size (16bit) chunks
   while(1){
     sprintf(ps1,"\nF4 state(A=%i PC=%i Over=%i) Enter command[%i]:",st.a,st.pc,st.overflow,end);
-    int ret=cli_handler(ps1,cmd_names);
-    if(ret==-1)
+    int ret=cli_handler((stat.st_mode & S_IFIFO)?"":ps1,cmd_names);
+    if(ret==-1 && intMode==false){  //in non interactive mode run commands once them all read
+      while(run_iteration(&st)!=0);       
+      
+      print_state();
       return 0;
+    }
     else if(ret==1 && intMode==true)
       printf("Wrong command or parameter(s)");
       
