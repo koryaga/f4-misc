@@ -8,10 +8,10 @@
 #include <f4.h>
 #include <cli.h>
 
-struct STATE st; //F4 CPU state
-int end=0; //instruction end in the memory. Index to set new instruction during editing
+static struct STATE st; //F4 CPU state
+static int end=0; //instruction end in the memory. Index to set new instruction during editing
 
-bool intMode=true; //how to process input non-interactive (pipe) or interactive (stdin, using commands)
+static bool intMode=true; //how to process input non-interactive (pipe) or interactive (stdin, using commands)
 
 int print_state();
 int print_code();
@@ -49,7 +49,7 @@ int set_instr_index(char *param[]){
 }
 
 int run_iteration_cmd(){
-  run_iteration(&st);
+  RunIteration(&st);
 }
 
 int edit_state(char *param[]){ // param[1]=a; pc; overflow; 
@@ -89,9 +89,10 @@ int main(int argc, char *argv[]){
   st.code=(struct INSTR *) malloc(size*sizeof(w_size)); //allocate memory in w_size (16bit) chunks
   while(1){
     sprintf(ps1,"\nF4 state(A=%i PC=%i Over=%i) Enter command[%i]:",st.a,st.pc,st.overflow,end);
-    int ret=cli_handler((stat.st_mode & S_IFIFO)?"":ps1,cmd_names);
+    int ret=HandleSingleCmd((stat.st_mode & S_IFIFO)?"":ps1,cmd_names);
+
     if(ret==-1 && intMode==false){  //in non interactive mode run commands once them all read
-      while(run_iteration(&st)!=0);       
+      while(!RunIteration(&st));       
       
       print_state();
       return 0;

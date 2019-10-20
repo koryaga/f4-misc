@@ -21,10 +21,9 @@ int main(){
   };
  
   struct STATE  st;
-  st.a=0;
-  st.pc=0;
+  Reset(&st);
+  
   st.size=20;
-  st.overflow=false;
   st.code=ss;
   
   for(int i=0;i<(st.size/2);i++){ 
@@ -44,18 +43,18 @@ int main(){
 }
 #endif
 
-int run_iteration(struct STATE *state ){
+int RunIteration(struct STATE *state ){
   #define A state->a  
   #define PC state->pc
   #define CMD state->code[PC/(sizeof(struct INSTR)/sizeof(w_size))].cmd
   #define PARAM state->code[PC/(sizeof(struct INSTR)/sizeof(w_size))].param
   
   if( (state == NULL || state->code == NULL ))
-    return 0;
+    return 1;
   
   if( (CMD == ADDm || CMD == BVS || CMD == LDAm || CMD == STAm) && (PARAM > state->size) ||
       ( PC >= state->size ))
-    return 0; //  next instruction or mem param out of programm memory/code
+    return 1; //  next instruction or mem param out of programm memory/code
     
   
 
@@ -123,10 +122,10 @@ int run_iteration(struct STATE *state ){
       break;
   }
 
-  return 1;
+  return 0; //SUCCESS
 }
 
-void reset(struct STATE *st){
+void Reset(struct STATE *st){
   st->a=0;
   st->pc=0;
   st->size=0;

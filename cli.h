@@ -13,10 +13,16 @@ struct cmd{
     int argc;
 };
 
-// Blocking loop to handle single command from cmd_name array
-// 1 - promt string; 2 - filled cmd array
-// 0 - ok; 1 - wrong command ; -1 - EOF
-int cli_handler(char *promt, struct cmd cmd_name[]);
+/* Blocking loop to handle single command from cmd_name array
+   Input:
+      promt string
+      filled cmd array
+   Returns:
+      0  - ok
+      1  - wrong command 
+      -1 - EOF 
+*/
+int HandleSingleCmd(char *promt, struct cmd cmd_name[]);
 
 
 #endif

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 #endif
 
 //parses single command string according to cmd_names
-int cli_handler(char *promt, struct cmd cmd_name[]){
+int HandleSingleCmd(char *promt, struct cmd cmd_name[]){
   bool ret=0;
   
   char *argv_c[MAX_PARAM_COUNT+1]={NULL}; // +1 for command name; argv_c[0] - command name; argv_c[1...] params
@@ -53,7 +53,7 @@ int cli_handler(char *promt, struct cmd cmd_name[]){
   char regex_cmdname[]="^[[:space:]]*([a-zA-Z]+|\n{1})"; // command name regex. Begining of regex ^  . \n - default command
   //char regex_cmdname[]="^[[:space:]]*([a-zA-Z]+)"; // command name regex. Begining of regex ^  . 
   char regex_param[]="([[:space:]]+([[:alnum:]]+))?"; // number or symb parameter regex :alnum:
-  char regex_spec_symb[]="[[:space:]]*$"; // space/tab/newline regex. End of regex $
+  char regex_spec_symb[]="([[:space:]]|#.*)*$"; // space/tab/newline regex. End of regex . # - is used as comments $
   char *regex_cmd=(char*)malloc(sizeof(regex_cmdname)+(MAX_PARAM_COUNT*sizeof(regex_param)+sizeof(regex_spec_symb))+1); // +1(\0)
 
   //making regex string

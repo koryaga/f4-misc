@@ -10,9 +10,10 @@ typedef unsigned short int w_size;
 struct STATE{            
   w_size a;             // A register. Accumulator
   w_size pc;            // Program Counter 
-  unsigned int size;    // size of code in words (w_size - 16 bit currently)
   bool overflow;        // overflow flag
-  struct INSTR *code;   // pointer to code 
+  // Non F4 CPU specific data
+  unsigned int size;    // size of code in words (w_size - 16 bit currently)
+  struct INSTR *code;   // pointer to code array 
 };
 
 // possible CPU instructions
@@ -36,7 +37,16 @@ struct INSTR{
   w_size param; // 16 bit , 0 in case no param
 };
 
-// run one iteration
-int  run_iteration(struct STATE *);
-void reset(struct STATE *);
+/* Run one cpu iteration 
+   Input:
+      STATE - CPU current state 
+   Return:
+      0 - SUCCESS
+      1 - ERROR
+ */
+int RunIteration(struct STATE *);
+
+/* Reset to zero/default values */
+void Reset(struct STATE *);
 #endif
+
