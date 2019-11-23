@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 #endif
 
 //parses single command string according to cmd_names
-int HandleSingleCmd(char *promt, struct cmd cmd_name[]){
+int HandleSingleCmd(char *promt, struct cmd cmd_name[],FILE *inputStream){
   bool ret=0;
   
   char *argv_c[MAX_PARAM_COUNT+1]={NULL}; // +1 for command name; argv_c[0] - command name; argv_c[1...] params
@@ -66,7 +66,7 @@ int HandleSingleCmd(char *promt, struct cmd cmd_name[]){
   int ret_code = regcomp(&re,(const char*)regex_cmd, REG_EXTENDED);
   
   printf("%s",promt);
-  if(fgets(str,sizeof(str),stdin)==NULL)
+  if(fgets(str,sizeof(str),inputStream)==NULL)
     return -1; //EOF
   
   //apply regexp
@@ -90,12 +90,13 @@ int HandleSingleCmd(char *promt, struct cmd cmd_name[]){
   // find related command and run it with params
   for(int i=0;cmd_name[i].name!=NULL;i++){
     if(strncmp(argv_c[0],cmd_name[i].name,MAX_CMDPARAM_SIZE) == 0){
-      if(cmd_name[i].argc==match_cnt-1){ //if params match
+      if(cmd_name[i].argc==match_cnt-1 || cmd_name[i].mandatory==false){ //if params match or param is not mandatory
         (cmd_name[i].ff)(argv_c);
         ret=0;
       }
       else
-        ret=1; //passed params not matched for command
+        if(cmd_name[i].mandatory==true)
+          ret=1; //passed params not matched for command
       break;
     
     }else

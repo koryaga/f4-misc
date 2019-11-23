@@ -13,6 +13,7 @@ f4cli: f4cli.o libf4.o libcli.o
 test: 
 	rm -rf libf4.o
 	$(CC) $(CFLAGS) -DTEST libf4.c -o f4_$@
+	./f4_$@
 
 clean:
 	rm -rf $(OBJ)  f4_test f4cli

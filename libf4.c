@@ -27,7 +27,7 @@ int main(){
   st.code=ss;
   
   for(int i=0;i<(st.size/2);i++){ 
-    if(!run_iteration(&st))
+    if(RunIteration(&st))
       { errno=-1; perror("Error"); }
     
   }
@@ -128,7 +128,5 @@ int RunIteration(struct STATE *state ){
 void Reset(struct STATE *st){
   st->a=0;
   st->pc=0;
-  st->size=0;
   st->overflow=false;
-  st->code=NULL;
 }

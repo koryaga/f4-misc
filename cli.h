@@ -11,18 +11,20 @@ struct cmd{
     char *name;
     int (*ff)(char *ss[]);
     int argc;
+    bool mandatory;
 };
 
 /* Blocking loop to handle single command from cmd_name array
    Input:
       promt string
       filled cmd array
+      FILE input stream to read command
    Returns:
       0  - ok
       1  - wrong command 
       -1 - EOF 
 */
-int HandleSingleCmd(char *promt, struct cmd cmd_name[]);
+int HandleSingleCmd(char*, struct cmd [], FILE* );
 
 
 #endif
