@@ -1,0 +1,23 @@
+# Multiplication X1*X2 . Result in A register
+LDAi 7 # X1  {1}
+LDAi 4 # X2  {3} 
+
+#variables
+LDAi 0 # VAR1 {5} 
+#algoritm start
+LDAm 3 #A:
+ADDi 65535
+STAm 3 # ${X2}
+BVS 20 # if v=1 goto L:
+LDAi 30 
+STApc  # goto D:
+LDAm 1 #L:
+ADDm 5 # ${VAR1}
+STAm 5 # ${VAR1}
+LDAi 8 
+STApc # goto A:
+LDAm 5 #D: 
+
+
+
+

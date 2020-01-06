@@ -52,7 +52,7 @@ int HandleSingleCmd(char *promt, struct cmd cmd_name[],FILE *inputStream){
   
   char regex_cmdname[]="^[[:space:]]*([a-zA-Z]+|\n{1})"; // command name regex. Begining of regex ^  . \n - default command
   //char regex_cmdname[]="^[[:space:]]*([a-zA-Z]+)"; // command name regex. Begining of regex ^  . 
-  char regex_param[]="([[:space:]]+([[:alnum:]]+))?"; // number or symb parameter regex :alnum:
+  char regex_param[]="([[:space:]]+([A-Za-z0-9.]+))?"; // number or symb parameter regex :alnum:
   char regex_spec_symb[]="([[:space:]]|#.*)*$"; // space/tab/newline regex. End of regex . # - is used as comments $
   char *regex_cmd=(char*)malloc(sizeof(regex_cmdname)+(MAX_PARAM_COUNT*sizeof(regex_param)+sizeof(regex_spec_symb))+1); // +1(\0)
 
