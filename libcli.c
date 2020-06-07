@@ -45,24 +45,13 @@ int main(int argc, char *argv[]){
 int HandleSingleCmd(char *promt, struct cmd cmd_name[],FILE *inputStream){
   bool ret=0;
   
-  char *argv_c[MAX_PARAM_COUNT+1]={NULL}; // +1 for command name; argv_c[0] - command name; argv_c[1...] params
+  char *argv_c[MAX_PARAM_COUNT+1+1]={NULL}; // +1 for command name; +1 for pc; argv_c[0] - command name; argv_c[1...] params; pc
   regex_t re;
   regmatch_t matches[MAX_PARAM_COUNT*2+2];  //  2=command match + end garbage match 
-  char str[MAX_CMDPARAM_SIZE+(MAX_PARAM_COUNT*(MAX_CMDPARAM_SIZE+1))+1];
+  char str[5+MAX_CMDPARAM_SIZE+(MAX_PARAM_COUNT*(MAX_CMDPARAM_SIZE+1))+1];
+  //                 line number                     command                     parameters                          comments  
+  char regex_cmd[]="^([[:xdigit:]]{0,5}[[:blank:]]+)?([a-zA-Z]+)([[:blank:]]{1,3}([A-Za-z0-9.]+)){0,3}[[:blank:]]{0,}[#[[:blank:]]{0,}[[:alnum:]]{0,}]?.*$";
   
-  char regex_cmdname[]="^[[:space:]]*([a-zA-Z]+|\n{1})"; // command name regex. Begining of regex ^  . \n - default command
-  //char regex_cmdname[]="^[[:space:]]*([a-zA-Z]+)"; // command name regex. Begining of regex ^  . 
-  char regex_param[]="([[:space:]]+([A-Za-z0-9.]+))?"; // number or symb parameter regex :alnum:
-  char regex_spec_symb[]="([[:space:]]|#.*)*$"; // space/tab/newline regex. End of regex . # - is used as comments $
-  char *regex_cmd=(char*)malloc(sizeof(regex_cmdname)+(MAX_PARAM_COUNT*sizeof(regex_param)+sizeof(regex_spec_symb))+1); // +1(\0)
-
-  //making regex string
-  regex_cmd[0]='\0';
-  strcat(regex_cmd,regex_cmdname);
-  for(int i=1;i<=MAX_PARAM_COUNT;i++)
-    strcat(regex_cmd,regex_param);
-  strcat(regex_cmd,regex_spec_symb);
-
   int ret_code = regcomp(&re,(const char*)regex_cmd, REG_EXTENDED);
   
   printf("%s",promt);
@@ -72,20 +61,30 @@ int HandleSingleCmd(char *promt, struct cmd cmd_name[],FILE *inputStream){
   //apply regexp
   ret_code = regexec(&re, str,sizeof(matches)/sizeof(matches[0]),(regmatch_t*)&matches,0);
   if (ret_code!=0){
-    free(regex_cmd);
     regfree(&re);
     return 1;//not match
   }
+ 
 
-  //copy command and each parsed parameter usinf malloc. Need a free! 
+  //copy command and each parsed parameter using malloc. Need a free! 
   int match_cnt=0;
   for(int i=0;i<MAX_PARAM_COUNT+1;i++){
-   if(matches[i*2+1].rm_so != -1){  // 0-is a whole word; 1-cmdname;2-spaces;3-param1;4-spaces;5-param2 ....
-      argv_c[i]=strndup(str+matches[i*2+1].rm_so,matches[i*2+1].rm_eo - matches[i*2+1].rm_so);
-      argv_c[i][matches[i*2+1].rm_eo - matches[i*2+1].rm_so]='\0';
-      match_cnt++;
-    }
+    
+    // 0-is a whole word; 1-pc; 2-cmdname; 3-spaces+param; 4-param1; 5-spaces+param; 6-param2 ....
+    if(matches[i*2+2].rm_so == -1)
+      break; 
+
+    argv_c[i]=strndup(str+matches[i*2+2].rm_so,matches[i*2+2].rm_eo - matches[i*2+2].rm_so);
+    argv_c[i][matches[i*2+2].rm_eo - matches[i*2+2].rm_so]='\0';
+    match_cnt++;
   }
+
+  //copy pc number to the last param
+  argv_c[match_cnt]=strndup(str+matches[1].rm_so,matches[1].rm_eo - matches[1].rm_so);
+  argv_c[match_cnt][matches[1].rm_eo - matches[1].rm_so]='\0';
+
+//for(int i=0;i<=match_cnt;i++)
+//printf("---%s\n",argv_c[i]);
 
   // find related command and run it with params
   for(int i=0;cmd_name[i].name!=NULL;i++){
@@ -106,7 +105,7 @@ int HandleSingleCmd(char *promt, struct cmd cmd_name[],FILE *inputStream){
   for(int i=0;i<match_cnt;i++)
     free(argv_c[i]);
   
-  free(regex_cmd);
+//  free(regex_cmd);
   regfree(&re);
   
   return ret;

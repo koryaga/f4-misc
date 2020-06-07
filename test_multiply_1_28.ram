@@ -1,0 +1,15 @@
+LDAi 7
+LDAi 4 
+LDAi 0 
+LDAm 3
+ADDi 65535
+STAm 3
+BVS 18
+LDAi 28
+STApc
+LDAm 1
+ADDm 5
+STAm 5
+LDAi 6
+STApc
+LDAm 5

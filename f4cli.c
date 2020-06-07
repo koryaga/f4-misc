@@ -31,7 +31,7 @@ struct cmd cmd_names[]={
     {"ps",print_state,0,true},         // print F4state
     {"ds",disassemble,2,false},         // print code . no_params - all; {1} - start index  {2} - number of bytes
     {"i",set_instr_index,1,true},      // edit instruction index where to put next CPU instruction. Interactive mode
-    {"\n",set_instr,0,true},           // for non interactive mode, to set 0 0 values 
+ //   {"\n",set_instr,0,true},           // for non interactive mode, to set 0 0 values 
     {"r",run_iteration_cmd,1,false},    // run  CPU instruction 
     {"load",loadCodeFromFile,1,true},    // run single CPU instruction 
     {cpu_instr[0],set_instr,1,true},    
@@ -68,11 +68,29 @@ int edit_state(char *param[]){ // param[1]=a; pc; overflow;
   //TODO need to realloc real code size if needed
 }
 
+// set instruction into program memory 
 int set_instr(char *param[]){
   struct INSTR is;
   int instr=((param[0][0]=='\n')?0:get_instr(param[0]));
   is.cmd = instr;
-  is.param = ( (param[1]!=NULL)?atoi(param[1]):0 );
+  int pc=-1;
+
+  for(int i=0;cmd_names[i].name!=NULL;i++){
+    if(strncmp(param[0],cmd_names[i].name,MAX_CMDPARAM_SIZE) == 0){
+      if (cmd_names[i].argc==1){ //only CPU commands has 0 or 1 parameters
+        is.param = ( (param[1]!=NULL)?atoi(param[1]):0 );
+        pc = ( (strnlen(param[2],MAX_CMDPARAM_SIZE)!=0)?atoi(param[2]):end );
+      }
+      else{
+        is.param = 0;
+        pc = ( (strnlen(param[1],MAX_CMDPARAM_SIZE)!=0)?atoi(param[1]):end );
+      }
+    }
+  }
+
+  if(pc != -1)
+    end=pc;
+
   if(end<st.size){
     memcpy((st.code+end/2),&is,sizeof(is));
     end+=2;
@@ -99,7 +117,7 @@ int main(int argc, char *argv[]){
   st.code=(struct INSTR *) malloc(size*sizeof(w_size)); //allocate memory in w_size (16bit) chunks
   while(1){
     sprintf(ps1,"\nF4 state(A=%i PC=%i Over=%i) Enter command[%i]:",st.a,st.pc,st.overflow,end);
-    int ret=HandleSingleCmd((stat.st_mode & S_IFIFO)?"":ps1,cmd_names,stdin);
+    int ret=HandleSingleCmd((intMode)?ps1:"",cmd_names,stdin);
 
     if(ret==-1 && intMode==false){  //in non interactive mode run commands once them all read
       char *tt[]={"all",NULL,NULL};
